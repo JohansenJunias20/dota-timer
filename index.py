@@ -55,13 +55,19 @@ def RoshanSpawnCall():
     global RoshanSpawnonceOnly
     RoshanSpawnonceOnly = True
     print("roshan is spawn")
-    playsound("roshan respawn.wav")
+    playsound("roshan respawn.wav",False)
 
+itemJungleonceOnly = False
 def AegisExpiredCall():
-    global BountyonceOnly
-    BountyonceOnly = True
-    print("Aegis expired 1 menit lagi")
-    playsound("aegis.wav")
+    global AegisonceOnly
+    AegisonceOnly = True
+    print("Aegis expired 1 menit lagi",False)
+    # playsound("aegis.wav")
+
+def itemJungleCall():
+    global itemJungleonceOnly
+    itemJungleonceOnly = True
+    playsound("itemJungle.wav",False)
 
 def BountyCall():
     global BountyonceOnly
@@ -119,8 +125,15 @@ while True:
 
     if(roshanDied + 4 == menit and AegisonceOnly == False):
         AegisExpiredCall()
+        print("\033[93mAegis will expired 1 more minute at: ",menit+1,":",detik)
     if(roshanDied + 8 == menit and RoshanSpawnonceOnly == False):
         RoshanSpawnCall()
+
+    if(menit==7 or menit==17 or menit == 27 or menit == 37 or menit == 60):
+        if(itemJungleonceOnly== False):
+            itemJungleCall()
+    else:
+        itemJungleonceOnly = False
 
     if (menit+1)%3 == 0:
         if detik >= 30:
