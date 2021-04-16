@@ -16,18 +16,6 @@ from pydub import AudioSegment
 from playsound import playsound
 import numpy as np
 
-win_0 = Window()
-label_0 = tk.Label(win_0.root, text="Window_0123123123")
-label_0.pack()
-Window.launch()
-win_0.destroy()
-Window.destroy()
-win_0.destroy_all()
-Window.destroy_all()
-win0 = Window()
-label_0 = tk.Label(win_0.root, text="Window_011111432634631")
-label_0.pack()
-Window.launch()
 
 user32 = ctypes.windll.user32
 width = user32.GetSystemMetrics(0)
@@ -50,39 +38,46 @@ def correction(x):
             return x
 
 
-label = Tkinter.Label(text='Text on the screen', font=('Times New Roman','80'), fg='black', bg='white')
-label.master.overrideredirect(True)
-label.master.geometry("+250+250")
-label.master.lift()
-label.master.wm_attributes("-topmost", True)
-label.master.wm_attributes("-disabled", True)
-label.master.wm_attributes("-transparentcolor", "white")
-
-hWindow = pywintypes.HANDLE(int(label.master.frame(), 16))
-# http://msdn.microsoft.com/en-us/library/windows/desktop/ff700543(v=vs.85).aspx
-# The WS_EX_TRANSPARENT flag makes events (like mouse clicks) fall through the window.
-exStyle = win32con.WS_EX_COMPOSITED | win32con.WS_EX_LAYERED | win32con.WS_EX_NOACTIVATE | win32con.WS_EX_TOPMOST | win32con.WS_EX_TRANSPARENT
-win32api.SetWindowLong(hWindow, win32con.GWL_EXSTYLE, exStyle)
-
-label.pack()
-label.mainloop()
 
 
-
-def checkRS():
-    if pyautogui.locateOnScreen('rs.png',confidence=0.8,region=(0,int(height*0.70),int(width/2),int(height)))!=None:
-        print("i can see it")
-        pyautogui.keyDown("altleft")
-        pyautogui.click(x=width/2,y=20)
-        pyautogui.keyUp("altleft")                      
-    else:
-        print("i cannot see it")
+# timer roshan when dead
+roshanDied = 0
 warn = False
-onceOnly = False
+warnRoshan = False
+warnExpiredAegis = False
+
+AegisonceOnly = False
+BountyonceOnly = False
+StackonceOnly = False
+RoshanSpawnonceOnly = False
+
+def RoshanSpawnCall():
+    global RoshanSpawnonceOnly
+    RoshanSpawnonceOnly = True
+    print("roshan is spawn")
+    playsound("roshan respawn.wav")
+
+def AegisExpiredCall():
+    global BountyonceOnly
+    BountyonceOnly = True
+    print("Aegis expired 1 menit lagi")
+    playsound("aegis.wav")
+
+def BountyCall():
+    global BountyonceOnly
+    BountyonceOnly = True
+    playsound("bounty.wav")
+
+def StackCall():
+    global StackonceOnly
+    StackonceOnly = True
+
+    playsound("stack.wav")
+
 while True:
     # Grab some screen
     time.sleep(0.1)
-    checkRS()
+    # checkRS()
     screen =  ImageGrab.grab(bbox=(width/2 -30,22,width/2 + 30,38))
     # Make greyscale
     w = screen.convert('L')
@@ -90,8 +85,8 @@ while True:
     # Save so we can see what we grabbed
     w.save('grabbed.png')
 
-  
-
+    
+ 
 
 
     pytesseract.pytesseract.tesseract_cmd = r'C:\Program Files\Tesseract-OCR\tesseract.exe'
@@ -115,20 +110,37 @@ while True:
         continue
     detik = int(detik)
     index = 0
-    if len(menit) == 2:
-        index = 1
-    if menit[index] == '4' or menit[index] == '9':
+    menit = int(menit)
+
+    if pyautogui.locateOnScreen('rs.png',confidence=0.8,region=(0,int(height*0.70),int(width/2),int(height)))!=None:
+        roshanDied = menit   
+        RoshanSpawnonceOnly = False
+        print("\033[92mAegis will expired at: ",menit+5,":",detik)
+
+    if(roshanDied + 4 == menit and AegisonceOnly == False):
+        AegisExpiredCall()
+    if(roshanDied + 8 == menit and RoshanSpawnonceOnly == False):
+        RoshanSpawnCall()
+
+    if (menit+1)%3 == 0:
         if detik >= 30:
-            warn = True
+            warnBounty = True
         else:
-            warn = False
+            warnBounty = False
     else:
-        warn = False
-    if(warn==False):
-        onceOnly = False
-    if(warn and onceOnly == False):
-        onceOnly = True
-        print("BOUNTY OUTPOST TOMB")
-        print(menit)
-        print(detik)
-        playsound("sound.wav")
+        warnBounty = False
+    
+    if detik >= 40:
+        warnStack = True
+    else:
+        warnStack = False
+        StackonceOnly = False
+
+    if(warnStack and StackonceOnly==False):
+        StackCall()
+
+    if(warnBounty==False):
+        BountyonceOnly = False
+    if(warnBounty and BountyonceOnly == False):
+        BountyCall()
+
